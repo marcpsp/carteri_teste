@@ -4,6 +4,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:github": "GITHUB_PAGES=true NODE_ENV=production NEXT_PUBLIC_BASE_PATH=/fasthome next build",
+    "export": "next export",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -11,7 +13,8 @@
     "setup": "node scripts/setup.js || scripts/setup.bat",
     "db:setup": "echo 'Execute as migrations em db/migrations/ no Supabase SQL Editor'",
     "db:sample": "echo 'Execute: SELECT public.populate_sample_data(); no Supabase'",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "deploy:github": "npm run build:github && touch out/.nojekyll"
   },
   "dependencies": {
     "@supabase/supabase-js": "^1.29.4",

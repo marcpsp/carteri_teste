@@ -72,7 +72,7 @@ npm run dev
 3. Configure o storage: `db/storage_setup.sql`
 4. (Opcional) Popule dados de exemplo: `SELECT public.populate_sample_data();`
 
-📚 **[Guia Completo de Deploy](./DEPLOY.md)**
+📚 **[Guia Completo de Deploy](./DEPLOY.md)** | 📄 **[Deploy GitHub Pages](./GITHUB_PAGES.md)**
 
 <h2>🛠️ Stack Tecnológica</h2>
 
