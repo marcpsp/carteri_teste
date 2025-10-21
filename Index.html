@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carteri Imóveis - Encontre seu Imóvel Ideal</title>
+    
+    <!-- React and ReactDOM via CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E85D3D',      // Laranja/coral da logo
+                        secondary: '#8B2F1B',    // Vermelho escuro da logo
+                        accent: '#F4A896',       // Tom claro/pêssego
+                        dark: '#2D2D2D',         // Cinza escuro para textos
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        .gradient-overlay {
+            background: linear-gradient(135deg, rgba(232, 93, 61, 0.9) 0%, rgba(139, 47, 27, 0.85) 100%);
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(232, 93, 61, 0.2);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #E85D3D 0%, #8B2F1B 100%);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Dados mockados baseados no properties.json
+        const mockProperties = [
+            {
+                id: 1,
+                titulo: "Casa Moderna com Piscina",
+                descricao: "Excelente casa em condomínio fechado com área de lazer completa",
+                preco: { valor: 850000, tipo: "venda" },
+                localizacao: { bairro: "Jardim das Américas", cidade: "Goiânia" },
+                caracteristicas: { tipo: "casa", quartos: 4, banheiros: 3, garagem: 2, area: 280 },
+                fotos: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800"],
+                destaque: true,
+                ativo: true
+            },
+            {
+                id: 2,
+                titulo: "Apartamento Alto Padrão",
+                descricao: "Apartamento luxuoso com vista panorâmica",
+                preco: { valor: 650000, tipo: "venda" },
+                localizacao: { bairro: "Setor Bueno", cidade: "Goiânia" },
+                caracteristicas: { tipo: "apartamento", quartos: 3, banheiros: 2, garagem: 2, area: 120 },
+                fotos: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800"],
+                destaque: true,
+                ativo: true
+            },
+            {
+                id: 3,
+                titulo: "Terreno Comercial",
+                descricao: "Terreno em área nobre, ideal para investimento",
+                preco: { valor: 450000, tipo: "venda" },
+                localizacao: { bairro: "Setor Marista", cidade: "Goiânia" },
+                caracteristicas: { tipo: "terreno", quartos: 0, banheiros: 0, garagem: 0, area: 500 },
+                fotos: ["https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800"],
+                destaque: false,
+                ativo: true
+            },
+            {
+                id: 4,
+                titulo: "Casa para Locação",
+                descricao: "Casa ampla e confortável para sua família",
+                preco: { valor: 3500, tipo: "aluguel" },
+                localizacao: { bairro: "Setor Oeste", cidade: "Goiânia" },
+                caracteristicas: { tipo: "casa", quartos: 3, banheiros: 2, garagem: 2, area: 180 },
+                fotos: ["https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800"],
+                destaque: true,
+                ativo: true
+            },
+            {
+                id: 5,
+                titulo: "Sala Comercial",
+                descricao: "Sala comercial em prédio moderno",
+                preco: { valor: 2200, tipo: "aluguel" },
+                localizacao: { bairro: "Setor Sul", cidade: "Goiânia" },
+                caracteristicas: { tipo: "comercial", quartos: 0, banheiros: 1, garagem: 1, area: 45 },
+                fotos: ["https://images.unsplash.com/photo-1497366216548-37526070297c?w=800"],
+                destaque: false,
+                ativo: true
+            },
+            {
+                id: 6,
+                titulo: "Apartamento Compacto",
+                descricao: "Perfeito para jovens profissionais",
+                preco: { valor: 1800, tipo: "aluguel" },
+                localizacao: { bairro: "Setor Central", cidade: "Goiânia" },
+                caracteristicas: { tipo: "apartamento", quartos: 2, banheiros: 1, garagem: 1, area: 65 },
+                fotos: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800"],
+                destaque: false,
+                ativo: true
+            }
+        ];
+
+        // Header Component
+        const Header = () => {
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+            return (
+                <header className="bg-white shadow-md sticky top-0 z-50">
+                    <div className="container mx-auto px-4 py-4">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                                <h1 className="text-3xl font-bold text-primary">CARTERI</h1>
+                                <span className="ml-2 text-sm text-gray-600">Imobiliária</span>
+                            </div>
+                            
+                            {/* Desktop Menu */}
+                            <nav className="hidden md:flex space-x-6">
+                                <a href="#home" className="text-gray-700 hover:text-primary transition">Home</a>
+                                <a href="#imoveis" className="text-gray-700 hover:text-primary transition">Imóveis</a>
+                                <a href="#sobre" className="text-gray-700 hover:text-primary transition">Sobre</a>
+                                <a href="#contato" className="text-gray-700 hover:text-primary transition">Contato</a>
+                            </nav>
+
+                            {/* Mobile Menu Button */}
+                            <button 
+                                className="md:hidden text-gray-700"
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            >
+                                <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'} text-2xl`}></i>
+                            </button>
+                        </div>
+
+                        {/* Mobile Menu */}
+                        {isMenuOpen && (
+                            <nav className="md:hidden mt-4 pb-4 space-y-3">
+                                <a href="#home" className="block text-gray-700 hover:text-primary">Home</a>
+                                <a href="#imoveis" className="block text-gray-700 hover:text-primary">Imóveis</a>
+                                <a href="#sobre" className="block text-gray-700 hover:text-primary">Sobre</a>
+                                <a href="#contato" className="block text-gray-700 hover:text-primary">Contato</a>
+                            </nav>
+                        )}
+                    </div>
+                </header>
+            );
+        };
+
+        // Hero Section
+        const Hero = () => {
+            return (
+                <section id="home" className="relative h-[600px] bg-cover bg-center" 
+                    style={{backgroundImage: "url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1600')"}}>
+                    <div className="absolute inset-0 gradient-overlay"></div>
+                    <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center text-white">
+                        <h1 className="text-4xl md:text-6xl font-bold mb-6 fade-in">
+                            ENCONTRE SEU IMÓVEL IDEAL OU INVESTIMENTO AQUI NA CARTERI IMOBILIÁRIA
+                        </h1>
+                        <p className="text-xl md:text-2xl mb-8 fade-in">
+                            Especialistas em imóveis em Goiânia e região
+                        </p>
+                        <div className="flex flex-wrap gap-4 justify-center fade-in">
+                            <a href="#imoveis" className="bg-white text-primary px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition">
+                                IMÓVEIS PRONTOS
+                            </a>
+                            <a href="#imoveis" className="bg-white text-primary px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition">
+                                PARA ALUGAR
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // Stats Section
+        const Stats = () => {
+            const stats = [
+                { value: "R$ 150 MI+", label: "VALOR GERAL DE VENDAS EM 2024" },
+                { value: "50 MIL+", label: "ACESSOS NO NOSSO SITE EM 2024" },
+                { value: "200+", label: "UNIDADES COMERCIALIZADAS EM 2024" }
+            ];
+
+            return (
+                <section className="py-16 bg-gray-50">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-4xl font-bold text-center mb-12">POR QUE SOMOS ESPECIALISTAS</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {stats.map((stat, index) => (
+                                <div key={index} className="stat-card text-white p-8 rounded-lg text-center card-hover">
+                                    <h3 className="text-4xl font-bold mb-4">{stat.value}</h3>
+                                    <p className="text-lg">{stat.label}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // Property Card Component
+        const PropertyCard = ({ property }) => {
+            const formatPrice = (valor, tipo) => {
+                const formatted = new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(valor);
+                return tipo === 'aluguel' ? `${formatted}/mês` : formatted;
+            };
+
+            return (
+                <div className="bg-white rounded-lg overflow-hidden shadow-lg card-hover">
+                    <div className="relative h-64">
+                        <img 
+                            src={property.fotos[0]} 
+                            alt={property.titulo}
+                            className="w-full h-full object-cover"
+                        />
+                        {property.destaque && (
+                            <span className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-bold">
+                                DESTAQUE
+                            </span>
+                        )}
+                    </div>
+                    <div className="p-6">
+                        <h3 className="text-xl font-bold mb-2 text-gray-800">{property.titulo}</h3>
+                        <p className="text-gray-600 mb-4">{property.descricao}</p>
+                        <p className="text-primary text-2xl font-bold mb-4">
+                            {formatPrice(property.preco.valor, property.preco.tipo)}
+                        </p>
+                        <div className="flex justify-between text-gray-600 mb-4">
+                            <span><i className="fas fa-bed mr-2"></i>{property.caracteristicas.quartos} quartos</span>
+                            <span><i className="fas fa-bath mr-2"></i>{property.caracteristicas.banheiros} banheiros</span>
+                            <span><i className="fas fa-car mr-2"></i>{property.caracteristicas.garagem} vagas</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-500">
+                            <span><i className="fas fa-map-marker-alt mr-2"></i>{property.localizacao.bairro}</span>
+                            <span><i className="fas fa-ruler-combined mr-2"></i>{property.caracteristicas.area}m²</span>
+                        </div>
+                        <button className="w-full mt-4 bg-primary text-white py-3 rounded-lg font-bold hover:bg-secondary transition">
+                            VER DETALHES
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Properties Section
+        const Properties = ({ properties }) => {
+            const [filter, setFilter] = useState('todos');
+            
+            const filteredProperties = properties.filter(prop => {
+                if (filter === 'todos') return true;
+                if (filter === 'venda') return prop.preco.tipo === 'venda';
+                if (filter === 'aluguel') return prop.preco.tipo === 'aluguel';
+                return true;
+            });
+
+            return (
+                <section id="imoveis" className="py-16 bg-white">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-4xl font-bold text-center mb-8">NOSSOS IMÓVEIS</h2>
+                        
+                        {/* Filter Buttons */}
+                        <div className="flex justify-center gap-4 mb-12">
+                            <button 
+                                onClick={() => setFilter('todos')}
+                                className={`px-6 py-3 rounded-lg font-bold transition ${
+                                    filter === 'todos' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
+                            >
+                                TODOS
+                            </button>
+                            <button 
+                                onClick={() => setFilter('venda')}
+                                className={`px-6 py-3 rounded-lg font-bold transition ${
+                                    filter === 'venda' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
+                            >
+                                VENDA
+                            </button>
+                            <button 
+                                onClick={() => setFilter('aluguel')}
+                                className={`px-6 py-3 rounded-lg font-bold transition ${
+                                    filter === 'aluguel' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
+                            >
+                                ALUGUEL
+                            </button>
+                        </div>
+
+                        {/* Properties Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {filteredProperties.map(property => (
+                                <PropertyCard key={property.id} property={property} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // About Section
+        const About = () => {
+            return (
+                <section id="sobre" className="py-16 bg-gray-50">
+                    <div className="container mx-auto px-4">
+                        <div className="max-w-4xl mx-auto text-center">
+                            <h2 className="text-4xl font-bold mb-8">SOBRE A CARTERI IMOBILIÁRIA</h2>
+                            <p className="text-xl text-gray-700 mb-6">
+                                Com anos de experiência no mercado imobiliário de Goiânia, a Carteri Imobiliária
+                                se destaca pela excelência no atendimento e compromisso com a realização dos
+                                sonhos de nossos clientes.
+                            </p>
+                            <p className="text-lg text-gray-600 mb-8">
+                                Nossa missão é conectar pessoas aos imóveis ideais, seja para moradia ou investimento,
+                                oferecendo todo o suporte necessário em cada etapa do processo.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                                <div className="p-6">
+                                    <i className="fas fa-award text-primary text-5xl mb-4"></i>
+                                    <h4 className="text-xl font-bold mb-2">EXCELÊNCIA</h4>
+                                    <p className="text-gray-600">Comprometimento com a qualidade em cada negócio</p>
+                                </div>
+                                <div className="p-6">
+                                    <i className="fas fa-handshake text-primary text-5xl mb-4"></i>
+                                    <h4 className="text-xl font-bold mb-2">CONFIANÇA</h4>
+                                    <p className="text-gray-600">Transparência e ética em todas as relações</p>
+                                </div>
+                                <div className="p-6">
+                                    <i className="fas fa-users text-primary text-5xl mb-4"></i>
+                                    <h4 className="text-xl font-bold mb-2">EXPERIÊNCIA</h4>
+                                    <p className="text-gray-600">Equipe especializada e qualificada</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // Contact Section
+        const Contact = () => {
+            return (
+                <section id="contato" className="py-16 bg-white">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-4xl font-bold text-center mb-12">ENTRE EM CONTATO</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                            {/* Contact Info */}
+                            <div className="space-y-6">
+                                <h3 className="text-2xl font-bold mb-6">Fale Conosco</h3>
+                                <div className="flex items-start space-x-4">
+                                    <i className="fas fa-phone text-primary text-2xl mt-1"></i>
+                                    <div>
+                                        <h4 className="font-bold">Telefone</h4>
+                                        <p className="text-gray-600">(62) 3238-2300</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start space-x-4">
+                                    <i className="fas fa-envelope text-primary text-2xl mt-1"></i>
+                                    <div>
+                                        <h4 className="font-bold">Email</h4>
+                                        <p className="text-gray-600">contato@carteriimoveis.com.br</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start space-x-4">
+                                    <i className="fas fa-map-marker-alt text-primary text-2xl mt-1"></i>
+                                    <div>
+                                        <h4 className="font-bold">Endereço</h4>
+                                        <p className="text-gray-600">Av. Principal, 1234 - Centro<br/>Goiânia - GO</p>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-4 mt-8">
+                                    <a href="#" className="text-primary hover:text-secondary text-3xl transition"><i className="fab fa-facebook"></i></a>
+                                    <a href="#" className="text-primary hover:text-secondary text-3xl transition"><i className="fab fa-instagram"></i></a>
+                                    <a href="#" className="text-primary hover:text-secondary text-3xl transition"><i className="fab fa-whatsapp"></i></a>
+                                </div>
+                            </div>
+
+                            {/* Contact Form */}
+                            <div>
+                                <form className="space-y-4">
+                                    <div>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Seu nome"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <input 
+                                            type="email" 
+                                            placeholder="Seu email"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <input 
+                                            type="tel" 
+                                            placeholder="Telefone"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <textarea 
+                                            rows="4"
+                                            placeholder="Sua mensagem"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                                        ></textarea>
+                                    </div>
+                                    <button 
+                                        type="submit"
+                                        className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-secondary transition"
+                                    >
+                                        ENVIAR MENSAGEM
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // Footer Component
+        const Footer = () => {
+            return (
+                <footer className="bg-gray-900 text-white py-16">
+                    <div className="container mx-auto px-4">
+                        {/* Top Section */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                            {/* Brand Section */}
+                            <div className="text-center md:text-left">
+                                <h3 className="text-3xl font-bold text-primary mb-4">CARTERI</h3>
+                                <p className="text-gray-400 mb-4">
+                                    Especialistas em imóveis em Goiânia e região. 
+                                    Encontre seu imóvel ideal com a gente!
+                                </p>
+                                <div className="flex space-x-4 justify-center md:justify-start">
+                                    <a href="#" className="bg-gray-800 hover:bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center transition">
+                                        <i className="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a href="#" className="bg-gray-800 hover:bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center transition">
+                                        <i className="fab fa-instagram"></i>
+                                    </a>
+                                    <a href="#" className="bg-gray-800 hover:bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center transition">
+                                        <i className="fab fa-whatsapp"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Links Section */}
+                            <div className="text-center md:text-left">
+                                <h4 className="font-bold text-lg mb-4 text-primary">NAVEGAÇÃO</h4>
+                                <ul className="space-y-3">
+                                    <li>
+                                        <a href="#home" className="text-gray-400 hover:text-primary transition flex items-center justify-center md:justify-start">
+                                            <i className="fas fa-chevron-right text-xs mr-2"></i>
+                                            Home
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#imoveis" className="text-gray-400 hover:text-primary transition flex items-center justify-center md:justify-start">
+                                            <i className="fas fa-chevron-right text-xs mr-2"></i>
+                                            Imóveis para Venda
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#imoveis" className="text-gray-400 hover:text-primary transition flex items-center justify-center md:justify-start">
+                                            <i className="fas fa-chevron-right text-xs mr-2"></i>
+                                            Imóveis para Aluguel
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#sobre" className="text-gray-400 hover:text-primary transition flex items-center justify-center md:justify-start">
+                                            <i className="fas fa-chevron-right text-xs mr-2"></i>
+                                            Sobre Nós
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            {/* Contact Section */}
+                            <div className="text-center md:text-left">
+                                <h4 className="font-bold text-lg mb-4 text-primary">CONTATO</h4>
+                                <ul className="space-y-3">
+                                    <li className="text-gray-400 flex items-start justify-center md:justify-start">
+                                        <i className="fas fa-phone text-primary mr-3 mt-1"></i>
+                                        <span>(62) 3238-2300</span>
+                                    </li>
+                                    <li className="text-gray-400 flex items-start justify-center md:justify-start">
+                                        <i className="fas fa-envelope text-primary mr-3 mt-1"></i>
+                                        <span>contato@carteriimoveis.com.br</span>
+                                    </li>
+                                    <li className="text-gray-400 flex items-start justify-center md:justify-start">
+                                        <i className="fas fa-map-marker-alt text-primary mr-3 mt-1"></i>
+                                        <span>Av. Principal, 1234 - Centro<br/>Goiânia - GO</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        {/* Bottom Section */}
+                        <div className="border-t border-gray-800 pt-8">
+                            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                                <p className="text-gray-400 text-sm text-center md:text-left">
+                                    ©2024 CARTERI Imobiliária. Todos os direitos reservados
+                                </p>
+                                <div className="flex space-x-6 text-sm">
+                                    <a href="#" className="text-gray-400 hover:text-primary transition">
+                                        Política de Privacidade
+                                    </a>
+                                    <a href="#contato" className="text-gray-400 hover:text-primary transition">
+                                        Fale Conosco
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            );
+        };
+
+        // WhatsApp Float Button
+        const WhatsAppButton = () => {
+            return (
+                <a 
+                    href="https://wa.me/5562999999999?text=Olá! Gostaria de saber mais sobre os imóveis"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="fixed bottom-6 right-6 bg-green-500 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition z-50"
+                    aria-label="WhatsApp"
+                >
+                    <i className="fab fa-whatsapp text-3xl"></i>
+                </a>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            return (
+                <>
+                    <Header />
+                    <Hero />
+                    <Stats />
+                    <Properties properties={mockProperties} />
+                    <About />
+                    <Contact />
+                    <Footer />
+                    <WhatsAppButton />
+                </>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
